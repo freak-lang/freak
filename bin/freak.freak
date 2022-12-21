@@ -1,0 +1,2 @@
+(ns freak (:require [freaklang]))
+  (.main freaklang)
