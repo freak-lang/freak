@@ -1,0 +1,63 @@
+(ns runner.main
+  (:require [freak.compiler :refer [compile]]))
+
+(def _freak_runtime (require "../runtime.js"))
+(def _freak_sequence (require "../sequence.js"))
+(def _freak_string (require "../string.js"))
+
+(defn fetch-source [src callback]
+  (let [xhr (new XMLHttpRequest)]
+    ;(.addEventListener xhr "timeout" (fn [ev] (console.log "Timeout loading" src)) false)
+    (.open xhr "GET" src true)
+    (.addEventListener xhr "load"
+                       (fn [ev]
+                         (if (and (>= xhr.status 200) (< xhr.status 300))
+                           (callback xhr.responseText)
+                           (console.error xhr.statusText))) false)
+    ;(set! (.-timeout xhr) 30)
+    (if xhr.overrideMimeType
+      (xhr.overrideMimeType "text/plain"))
+    (xhr.setRequestHeader "If-Modified-Since" "Fri, 01 Jan 1960 00:00:00 GMT")
+    (.send xhr null)))
+
+(defn run-freak-code [code url]
+  (let [result (compile code {:source-uri (or url "inline")})
+        error (:error result)]
+    (if error
+      (console.error error)
+      ((Function (eval (:code result)))))))
+
+(defn fetch-and-run-freak-code [url]
+  (fetch-source url
+                (fn [code]
+                  (run-freak-code code url))))
+
+(defn __main__ [ev]
+  ; hoist freak builtins into the global window context
+  (.forEach [_freak_string _freak_sequence _freak_runtime]
+            (fn [f]
+              (.forEach (.keys Object f)
+                        #(set! (get window %) (get f %)))))
+  ;(console.log "running __main__")
+  ; find all the script tags on the page
+  (let [scripts (document.getElementsByTagName "script")]
+    (loop [x 0]
+      ; loop through every script tag
+      (if (< x scripts.length)
+        (let [script (get scripts x)
+              source (.-src script)
+              content (.-text script)
+              content-type (.-type script)]
+          ;(console.log "src:" (.-src script))
+          ;(console.log "type:" (.-type script))
+          ;(console.log "content:" (.-text script))
+          ; if the script tag has application/freak as the type then run it
+          (if (== content-type "application/freak")
+            (do
+              (if source
+                (fetch-and-run-freak-code source))
+              (if content
+                (run-freak-code content source))))
+          (recur (+ x 1)))))))
+
+(.addEventListener window "load" __main__ false)

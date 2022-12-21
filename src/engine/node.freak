@@ -1,0 +1,19 @@
+(ns freak.engine.node
+  (:require [fs :refer [read-file-sync]]
+            [freak.compiler :refer [compile]]))
+
+(set! global.**verbose** (<= 0 (.indexOf process.argv :--verbose)))
+
+(defn compile-path
+  [path]
+  (let [source (read-file-sync path :utf8)
+        output (compile source {:source-uri path})]
+    (if (:error output)
+      (throw (:error output))
+      (:code output))))
+
+;; Register `.freak` file extension so that
+;; modules can be simply required.
+(set! (get require.extensions ".freak")
+      (fn [src path]
+        (._compile src (compile-path path) path)))

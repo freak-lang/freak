@@ -1,0 +1,25 @@
+(ns freak.engine.browser-export
+  (:require [freak.engine.browser :as browser]
+            [freak.runtime :as runtime]
+            [freak.sequence :as sequence]
+            [freak.reader :as reader]
+            [freak.compiler :as compiler]
+            [freak.string :as string]
+            [freak.expander :as expander]
+            [freak.analyzer :as analyzer]
+            [freak.backend.javascript.writer :as writer]
+            [freak.ast :as ast]
+            ))
+
+(set! module.exports {
+                      :engine {:browser browser}
+                      :runtime runtime
+                      :sequence sequence
+                      :reader reader
+                      :compiler compiler
+                      :string string
+                      :expander expander
+                      :analyzer analyzer
+                      :backend {:javascript {:writer writer}}
+                      :ast ast
+                      })
