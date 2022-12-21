@@ -1,0 +1,7 @@
+(ns freak.test.compiler
+  (:require [freak.src.ast :refer [symbol]]
+            [freak.src.sequence :refer [list]]
+            [freak.src.runtime :refer [str =]]
+            [freak.src.compiler :refer [self-evaluating? compile macroexpand
+                                       compile-program]]
+            [freak.src.reader :refer [read-from-string]]))

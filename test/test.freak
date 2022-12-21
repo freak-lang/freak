@@ -1,0 +1,11 @@
+(ns freak.test.index
+  (:require freak.test.util
+            freak.test.sequence
+            freak.test.ast
+            freak.test.runtime
+            freak.test.string
+            freak.test.reader
+            freak.test.escodegen
+            freak.test.protocols
+            freak.test.analyzer
+            freak.test.macros))
